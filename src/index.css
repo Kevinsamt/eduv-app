@@ -1,13 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #4e54c8;
+  --primary-light: #8f94fb;
+  --secondary-color: #00c6ff;
+  --accent-color: #ff5e62;
+  --bg-dark: #1e1e2f;
+  --bg-darker: #16213e;
+  --bg-lighter: #f7f9fc;
+  --text-light: #ffffff;
+  --text-gray: #e0e0e0;
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --nav-bg: rgba(255, 255, 255, 0.95);
+  --card-bg: #ffffff;
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --border-color: #eeeeee;
+  --hover-color: rgba(0, 0, 0, 0.03);
+  --section-padding: 80px 0;
+  --border-radius: 12px;
+  --transition: all 0.3s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+a:hover {
+  color: var(--secondary-color);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+button, input, select, textarea {
+  font-family: 'Poppins', sans-serif;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+  background-color: var(--bg-lighter);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--primary-color);
+  transition: var(--transition);
 }
+
+.dark-theme {
+  --bg-color: #1a1a2e;
+  --bg-lighter: #242450;
+  --text-color: #f0f0f0;
+  --card-bg: #242450;
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  --border-color: #373764;
+  --hover-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme code {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--secondary-color);
+}
+
+/* Selection styling */
+::selection {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-lighter);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+} 

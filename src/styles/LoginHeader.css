@@ -1,0 +1,199 @@
+.login-header {
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 15px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.dark-theme .login-header {
+    background-color: #1a1a2e;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.login-header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.login-logo {
+    display: flex;
+    align-items: center;
+}
+
+.login-logo img {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.login-logo span {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #4e54c8;
+}
+
+.dark-theme .login-logo span {
+    color: #8f94fb;
+}
+
+.login-nav-container {
+    display: flex;
+    align-items: center;
+}
+
+.login-nav ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.login-nav li {
+    margin-left: 25px;
+}
+
+.login-nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    position: relative;
+}
+
+.dark-theme .login-nav a {
+    color: #f0f0f0;
+}
+
+.login-nav a:hover {
+    color: #4e54c8;
+}
+
+.login-nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #4e54c8;
+    transition: width 0.3s ease;
+}
+
+.login-nav a:hover::after {
+    width: 100%;
+}
+
+.theme-toggle {
+    cursor: pointer;
+    font-size: 1.2rem;
+    margin-left: 20px;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    transform: rotate(30deg);
+}
+
+.dark-theme .theme-toggle {
+    color: #f0f0f0;
+}
+
+/* Hamburger Menu */
+.login-hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 20px;
+    cursor: pointer;
+    z-index: 1010;
+}
+
+.login-hamburger span {
+    width: 100%;
+    height: 2px;
+    background-color: #333;
+    transition: all 0.3s ease;
+}
+
+.dark-theme .login-hamburger span {
+    background-color: #f0f0f0;
+}
+
+.login-hamburger.active span:nth-child(1) {
+    transform: translateY(9px) rotate(45deg);
+}
+
+.login-hamburger.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.login-hamburger.active span:nth-child(3) {
+    transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Mobile Responsive Styles */
+@media screen and (max-width: 768px) {
+    .login-hamburger {
+        display: flex;
+    }
+
+    .login-nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 70%;
+        max-width: 300px;
+        height: 100vh;
+        background-color: #fff;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        padding: 80px 20px 20px;
+        transition: right 0.3s ease;
+        z-index: 1000;
+    }
+
+    .dark-theme .login-nav {
+        background-color: #1a1a2e;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .login-nav.open {
+        right: 0;
+    }
+
+    .login-nav ul {
+        flex-direction: column;
+    }
+
+    .login-nav li {
+        margin-left: 0;
+        margin-bottom: 20px;
+    }
+
+    .login-nav a {
+        display: block;
+        font-size: 1.2rem;
+        padding: 10px 0;
+    }
+}
+
+/* Add a backdrop when mobile menu is open */
+.login-nav.open::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 30%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+} 

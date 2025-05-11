@@ -1,0 +1,239 @@
+/* Header.css - Unified navbar and sidebar styling */
+
+header {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+/* Top navbar (visible on all screen sizes) */
+.top-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 50px;
+    margin-right: 10px;
+}
+
+.logo span {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+/* Sidebar (hidden on mobile by default) */
+.sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    width: 280px;
+    height: 100vh;
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
+    padding: 20px 0;
+    z-index: 1100;
+    transition: all 0.3s ease-in-out;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+header.sidebar-open .sidebar {
+    left: 0;
+}
+
+.sidebar .logo {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 15px;
+}
+
+.sidebar .nav-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px;
+}
+
+.sidebar .nav-links li {
+    margin: 10px 0;
+}
+
+.sidebar .nav-links li a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 18px;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 8px;
+}
+
+.sidebar .nav-links li a:hover {
+    color: var(--primary-color);
+    background-color: var(--hover-color);
+}
+
+.sidebar .nav-links li a i {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+.sidebar .nav-links li a.active {
+    font-weight: 600;
+    color: var(--primary-color);
+    background-color: var(--hover-color);
+}
+
+.sidebar .theme-toggle {
+    margin: 20px auto;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: var(--hover-color);
+    transition: all 0.3s ease;
+}
+
+.sidebar .login {
+    background: var(--primary-color);
+    color: var(--text-light) !important;
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+    transition: transform 0.3s, box-shadow 0.3s;
+    justify-content: center !important;
+}
+
+.sidebar .login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 230, 118, 0.4);
+}
+
+/* Menu toggle button */
+.menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 24px;
+    color: var(--text-color);
+    transition: color 0.3s ease;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.menu-toggle:hover {
+    background-color: var(--hover-color);
+}
+
+/* Mobile theme toggle (only visible on mobile) */
+.theme-toggle-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--text-color);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--hover-color);
+    transition: all 0.3s ease;
+}
+
+/* Overlay when sidebar is open (mobile only) */
+.mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1050;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+header.sidebar-open .mobile-overlay {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Desktop styles - hide mobile elements */
+@media (min-width: 769px) {
+    .sidebar {
+        left: 0;
+        width: 280px;
+        box-shadow: none;
+    }
+    
+    .top-navbar {
+        margin-left: 280px;
+        width: calc(100% - 280px);
+    }
+    
+    .menu-toggle, .theme-toggle-mobile, .mobile-overlay {
+        display: none;
+    }
+    
+    main {
+        margin-left: 280px;
+        width: calc(100% - 280px);
+        margin-top: 80px;
+    }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    .sidebar .logo {
+        display: none;
+    }
+    
+    .theme-toggle {
+        display: none;
+    }
+}
+
+/* Dark theme adjustments */
+body.dark-theme .sidebar,
+body.dark-theme .top-navbar {
+    background: var(--bg-dark);
+}
+
+body.dark-theme .sidebar .nav-links li a,
+body.dark-theme .logo span,
+body.dark-theme .menu-toggle,
+body.dark-theme .theme-toggle-mobile {
+    color: var(--text-light);
+}
+
+body.dark-theme .sidebar .nav-links li a:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .sidebar .nav-links li a.active {
+    background-color: rgba(255, 255, 255, 0.05);
+} 
