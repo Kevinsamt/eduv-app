@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/TalentAccount.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapMarkerAlt, faClock, faCalendar, faArrowRight, faTimes, faChevronLeft, faChevronRight, faUser, faNewspaper, faBook, faCalendarAlt, faCertificate, faCog, faSignOutAlt, faSun, faMoon, faChartLine } from '@fortawesome/free-solid-svg-icons';
+import { faMapMarkerAlt, faClock, faCalendar, faArrowRight, faTimes, faChevronLeft, faChevronRight, faUser, faNewspaper, faBook, faCalendarAlt, faCertificate, faCog, faSignOutAlt, faSun, faMoon, faChartLine, faComments, faPlus, faUsers, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 import { QRCodeSVG } from 'qrcode.react';
 
 const TalentAccount = () => {
@@ -50,6 +50,26 @@ const TalentAccount = () => {
         tipePeserta: 'Umum',
         buktiPembayaran: 'Tidak ada'
     });
+    
+    // Chat related states
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
+    const [activeChat, setActiveChat] = useState(null);
+    const [chats, setChats] = useState([]);
+    const [showNewChatModal, setShowNewChatModal] = useState(false);
+    const [newChatForm, setNewChatForm] = useState({
+        name: '',
+        type: 'private',
+        participants: []
+    });
+    const [availableUsers, setAvailableUsers] = useState([]);
+    const [selectedParticipants, setSelectedParticipants] = useState([]);
+    const [floatingMessages, setFloatingMessages] = useState([]);
+    
+    // Add these new state variables at the top with other chat states
+    const [typingUsers, setTypingUsers] = useState({});
+    const [messageReactions, setMessageReactions] = useState({});
+    const [showReactionPicker, setShowReactionPicker] = useState(null);
     
     const navigate = useNavigate();
 
@@ -462,6 +482,345 @@ const TalentAccount = () => {
         setActiveEventTab(tab);
     };
 
+    // Chat related functions
+    const handleSendMessage = () => {
+        if (!newMessage.trim() || !activeChat || !userData) return;
+        
+        const message = {
+            id: Date.now(),
+            chatId: activeChat.id,
+            content: newMessage,
+            senderId: userData.email,
+            senderName: userData.name,
+            timestamp: new Date().toISOString()
+        };
+        
+        // Add message to messages list
+        setMessages(prev => [...prev, message]);
+        
+        // Update last message in chat
+        setChats(prev => prev.map(chat => 
+            chat.id === activeChat.id 
+                ? { ...chat, lastMessage: newMessage }
+                : chat
+        ));
+        
+        // Create floating message
+        const floatingMessage = {
+            id: Date.now(),
+            content: newMessage,
+            sender: userData.name,
+            position: {
+                x: Math.random() * (window.innerWidth - 200),
+                y: Math.random() * (window.innerHeight - 100)
+            }
+        };
+        
+        setFloatingMessages(prev => [...prev, floatingMessage]);
+        
+        // Remove floating message after 5 seconds
+        setTimeout(() => {
+            setFloatingMessages(prev => prev.filter(msg => msg.id !== floatingMessage.id));
+        }, 5000);
+        
+        // Clear input
+        setNewMessage('');
+    };
+    
+    const handleCreateChat = (e) => {
+        e.preventDefault();
+        
+        if (!userData) return;
+        
+        const newChat = {
+            id: Date.now(),
+            type: newChatForm.type,
+            name: newChatForm.type === 'group' 
+                ? newChatForm.name 
+                : availableUsers.find(u => u.email === selectedParticipants[0])?.name || 'New Chat',
+            participants: [...selectedParticipants, userData.email],
+            lastMessage: null,
+            createdAt: new Date().toISOString()
+        };
+        
+        setChats(prev => [...prev, newChat]);
+        setShowNewChatModal(false);
+        setNewChatForm({
+            name: '',
+            type: 'private',
+            participants: []
+        });
+        setSelectedParticipants([]);
+    };
+    
+    const toggleParticipant = (email) => {
+        setSelectedParticipants(prev => {
+            if (prev.includes(email)) {
+                return prev.filter(e => e !== email);
+            } else {
+                return [...prev, email];
+            }
+        });
+    };
+    
+    // Load available users for chat
+    useEffect(() => {
+        const loadAvailableUsers = () => {
+            try {
+                const savedTalents = localStorage.getItem('talents');
+                if (savedTalents) {
+                    const talents = JSON.parse(savedTalents);
+                    setAvailableUsers(talents.filter(t => t.email !== userData?.email));
+                }
+            } catch (error) {
+                console.error('Error loading available users:', error);
+            }
+        };
+        
+        loadAvailableUsers();
+    }, [userData]);
+    
+    // Load existing chats
+    useEffect(() => {
+        const loadChats = () => {
+            try {
+                const savedChats = localStorage.getItem('chats');
+                if (savedChats) {
+                    setChats(JSON.parse(savedChats));
+                }
+            } catch (error) {
+                console.error('Error loading chats:', error);
+            }
+        };
+        
+        loadChats();
+    }, []);
+    
+    // Save chats to localStorage when updated
+    useEffect(() => {
+        if (chats.length > 0) {
+            localStorage.setItem('chats', JSON.stringify(chats));
+        }
+    }, [chats]);
+    
+    // Load messages for active chat
+    useEffect(() => {
+        const loadMessages = () => {
+            try {
+                const savedMessages = localStorage.getItem('messages');
+                if (savedMessages) {
+                    setMessages(JSON.parse(savedMessages));
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        };
+        
+        loadMessages();
+    }, []);
+    
+    // Save messages to localStorage when updated
+    useEffect(() => {
+        if (messages.length > 0) {
+            localStorage.setItem('messages', JSON.stringify(messages));
+        }
+    }, [messages]);
+
+    // Add these new functions after other chat functions
+    const handleTyping = () => {
+        if (!activeChat || !userData) return;
+        
+        // Notify other users that this user is typing
+        const typingData = {
+            chatId: activeChat.id,
+            userId: userData.email,
+            userName: userData.name
+        };
+        
+        // In a real app, this would be sent to a server
+        // For demo, we'll just update local state
+        setTypingUsers(prev => ({
+            ...prev,
+            [activeChat.id]: {
+                ...prev[activeChat.id],
+                [userData.email]: {
+                    name: userData.name,
+                    timestamp: Date.now()
+                }
+            }
+        }));
+        
+        // Clear typing indicator after 3 seconds
+        setTimeout(() => {
+            setTypingUsers(prev => {
+                const newState = { ...prev };
+                if (newState[activeChat.id]?.[userData.email]) {
+                    delete newState[activeChat.id][userData.email];
+                }
+                return newState;
+            });
+        }, 3000);
+    };
+    
+    const handleReaction = (messageId, reaction) => {
+        if (!userData) return;
+        
+        setMessageReactions(prev => {
+            const messageReactions = prev[messageId] || {};
+            const userReactions = messageReactions[userData.email] || [];
+            
+            // Toggle reaction if user already reacted with this emoji
+            if (userReactions.includes(reaction)) {
+                const newUserReactions = userReactions.filter(r => r !== reaction);
+                if (newUserReactions.length === 0) {
+                    delete messageReactions[userData.email];
+                } else {
+                    messageReactions[userData.email] = newUserReactions;
+                }
+            } else {
+                messageReactions[userData.email] = [...userReactions, reaction];
+            }
+            
+            return {
+                ...prev,
+                [messageId]: messageReactions
+            };
+        });
+    };
+    
+    const getReactionCount = (messageId, reaction) => {
+        const reactions = messageReactions[messageId] || {};
+        return Object.values(reactions).flat().filter(r => r === reaction).length;
+    };
+    
+    const getUserReactions = (messageId) => {
+        if (!userData) return [];
+        return messageReactions[messageId]?.[userData.email] || [];
+    };
+    
+    // Modify the message input section in the chat interface
+    const renderMessageInput = () => (
+        <div className="message-input">
+            <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => {
+                    setNewMessage(e.target.value);
+                    handleTyping();
+                }}
+                placeholder="Type a message..."
+                onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                        handleSendMessage();
+                    }
+                }}
+            />
+            <button onClick={handleSendMessage}>
+                <FontAwesomeIcon icon={faPaperPlane} />
+            </button>
+        </div>
+    );
+    
+    // Modify the message rendering to include reactions
+    const renderMessage = (message) => (
+        <div 
+            key={message.id}
+            className={`message ${message.senderId === userData?.email ? 'sent' : 'received'}`}
+        >
+            <div className="message-content">
+                <p>{message.content}</p>
+                <div className="message-reactions">
+                    {['👍', '❤️', '😂', '😮', '😢', '👏'].map(emoji => {
+                        const count = getReactionCount(message.id, emoji);
+                        if (count > 0) {
+                            return (
+                                <span 
+                                    key={emoji}
+                                    className={`reaction ${getUserReactions(message.id).includes(emoji) ? 'user-reacted' : ''}`}
+                                    onClick={() => handleReaction(message.id, emoji)}
+                                >
+                                    {emoji} {count}
+                                </span>
+                            );
+                        }
+                        return null;
+                    })}
+                    <button 
+                        className="add-reaction"
+                        onClick={() => setShowReactionPicker(message.id)}
+                    >
+                        +
+                    </button>
+                </div>
+                <span className="message-time">
+                    {new Date(message.timestamp).toLocaleTimeString()}
+                </span>
+            </div>
+        </div>
+    );
+    
+    // Add reaction picker component
+    const renderReactionPicker = () => {
+        if (!showReactionPicker) return null;
+        
+        return (
+            <div 
+                className="reaction-picker"
+                style={{
+                    position: 'absolute',
+                    bottom: '100%',
+                    right: '0',
+                    background: 'white',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                    zIndex: 1000
+                }}
+            >
+                {['👍', '❤️', '😂', '😮', '😢', '👏'].map(emoji => (
+                    <button
+                        key={emoji}
+                        className="reaction-emoji"
+                        onClick={() => {
+                            handleReaction(showReactionPicker, emoji);
+                            setShowReactionPicker(null);
+                        }}
+                    >
+                        {emoji}
+                    </button>
+                ))}
+            </div>
+        );
+    };
+    
+    // Add typing indicator component
+    const renderTypingIndicator = () => {
+        if (!activeChat) return null;
+        
+        const typingUsers = Object.values(typingUsers[activeChat.id] || {})
+            .filter(user => user.userId !== userData?.email)
+            .map(user => user.userName);
+        
+        if (typingUsers.length === 0) return null;
+        
+        return (
+            <div className="typing-indicator">
+                {typingUsers.join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
+            </div>
+        );
+    };
+    
+    // Update the messages container in the chat interface
+    const renderMessagesContainer = () => (
+        <div className="messages-container">
+            {messages
+                .filter(msg => msg.chatId === activeChat.id)
+                .map(renderMessage)}
+            {renderTypingIndicator()}
+            {renderReactionPicker()}
+        </div>
+    );
+
     if (loading) {
         return <div className="loading">Loading user data...</div>;
     }
@@ -609,6 +968,171 @@ const TalentAccount = () => {
                                 ))
                             )}
                         </div>
+                    </div>
+                );
+            case 'chat':
+                return (
+                    <div className="content-section chat-section">
+                        <h2>Chat</h2>
+                        <div className="chat-container">
+                            <div className="chat-sidebar">
+                                <div className="chat-header">
+                                    <h3>Conversations</h3>
+                                    <button 
+                                        className="new-chat-button"
+                                        onClick={() => setShowNewChatModal(true)}
+                                    >
+                                        <FontAwesomeIcon icon={faPlus} />
+                                    </button>
+                                </div>
+                                
+                                <div className="chat-list">
+                                    {chats.length === 0 ? (
+                                        <div className="no-chats-message">
+                                            <p>No conversations yet</p>
+                                            <button 
+                                                className="start-chat-button"
+                                                onClick={() => setShowNewChatModal(true)}
+                                            >
+                                                Start a New Chat
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        chats.map(chat => (
+                                            <div 
+                                                key={chat.id}
+                                                className={`chat-item ${activeChat?.id === chat.id ? 'active' : ''}`}
+                                                onClick={() => setActiveChat(chat)}
+                                            >
+                                                <div className="chat-item-avatar">
+                                                    {chat.type === 'group' ? (
+                                                        <FontAwesomeIcon icon={faUsers} />
+                                                    ) : (
+                                                        <span>{chat.name.charAt(0)}</span>
+                                                    )}
+                                                </div>
+                                                <div className="chat-item-info">
+                                                    <h4>{chat.name}</h4>
+                                                    <p>{chat.lastMessage || 'No messages yet'}</p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                            
+                            <div className="chat-main">
+                                {activeChat ? (
+                                    <>
+                                        <div className="chat-header">
+                                            <h3>{activeChat.name}</h3>
+                                            {activeChat.type === 'group' && (
+                                                <button className="group-info-button">
+                                                    <FontAwesomeIcon icon={faUsers} />
+                                                </button>
+                                            )}
+                                        </div>
+                                        
+                                        {renderMessagesContainer()}
+                                        
+                                        {renderMessageInput()}
+                                    </>
+                                ) : (
+                                    <div className="no-chat-selected">
+                                        <FontAwesomeIcon icon={faComments} size="3x" />
+                                        <h3>Select a conversation or start a new one</h3>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        {/* New Chat Modal */}
+                        {showNewChatModal && (
+                            <div className="modal-overlay">
+                                <div className="modal-content">
+                                    <button className="close-button" onClick={() => setShowNewChatModal(false)}>
+                                        <FontAwesomeIcon icon={faTimes} />
+                                    </button>
+                                    
+                                    <h2>New Conversation</h2>
+                                    
+                                    <form onSubmit={handleCreateChat}>
+                                        <div className="form-group">
+                                            <label>Chat Type</label>
+                                            <select
+                                                value={newChatForm.type}
+                                                onChange={(e) => setNewChatForm(prev => ({
+                                                    ...prev,
+                                                    type: e.target.value
+                                                }))}
+                                            >
+                                                <option value="private">Private Chat</option>
+                                                <option value="group">Group Chat</option>
+                                            </select>
+                                        </div>
+                                        
+                                        {newChatForm.type === 'group' && (
+                                            <div className="form-group">
+                                                <label>Group Name</label>
+                                                <input
+                                                    type="text"
+                                                    value={newChatForm.name}
+                                                    onChange={(e) => setNewChatForm(prev => ({
+                                                        ...prev,
+                                                        name: e.target.value
+                                                    }))}
+                                                    required
+                                                />
+                                            </div>
+                                        )}
+                                        
+                                        <div className="form-group">
+                                            <label>Select Participants</label>
+                                            <div className="participants-list">
+                                                {availableUsers.map(user => (
+                                                    <div 
+                                                        key={user.email}
+                                                        className={`participant-item ${selectedParticipants.includes(user.email) ? 'selected' : ''}`}
+                                                        onClick={() => toggleParticipant(user.email)}
+                                                    >
+                                                        <span className="participant-avatar">
+                                                            {user.name.charAt(0)}
+                                                        </span>
+                                                        <span className="participant-name">{user.name}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="form-actions">
+                                            <button type="button" className="cancel-button" onClick={() => setShowNewChatModal(false)}>
+                                                Cancel
+                                            </button>
+                                            <button type="submit" className="submit-button">
+                                                Create Chat
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Floating Messages */}
+                        {floatingMessages.map(message => (
+                            <div 
+                                key={message.id}
+                                className="floating-message"
+                                style={{
+                                    left: `${message.position.x}px`,
+                                    top: `${message.position.y}px`
+                                }}
+                            >
+                                <div className="floating-message-content">
+                                    <p>{message.content}</p>
+                                    <span className="floating-message-sender">{message.sender}</span>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 );
             case 'events':
@@ -1083,6 +1607,16 @@ const TalentAccount = () => {
                             <FontAwesomeIcon icon={faNewspaper} />
                         </span>
                         <span>News</span>
+                    </div>
+                    
+                    <div 
+                        className={`menu-item ${activeSection === 'chat' ? 'active' : ''}`}
+                        onClick={() => handleMenuClick('chat')}
+                    >
+                        <span className="menu-icon">
+                            <FontAwesomeIcon icon={faComments} />
+                        </span>
+                        <span>Chat</span>
                     </div>
                     
                     <div 
