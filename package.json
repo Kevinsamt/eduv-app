@@ -30,7 +30,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "concurrently \"set PORT=3000 && react-scripts start\" \"node server/server.js\"",
+    "start": "concurrently \"set PORT=3000 && set HOST=192.168.24.133 && react-scripts start\" \"node server/server.js\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

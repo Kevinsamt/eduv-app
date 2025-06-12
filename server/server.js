@@ -7,11 +7,11 @@ const path = require('path');
 
 // Initialize express app
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = 3000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: 'http://192.168.24.133:3000',
   credentials: true
 }));
 app.use(express.json());
@@ -370,7 +370,12 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Start server
+app.listen(PORT, '0.0.0.0', (err) => {
+  if (err) {
+    console.error('Error starting server:', err);
+    return;
+  }
+  console.log(`Server is running on http://0.0.0.0:${PORT}`);
+  console.log(`You can access it at http://192.168.24.133:${PORT}`);
 }); 
