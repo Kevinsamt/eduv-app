@@ -11,7 +11,7 @@ const PORT = 3000;
 
 // Middleware
 app.use(cors({
-  origin: 'http://192.168.24.133:3000',
+  origin: ['http://192.168.24.133:3000', 'https://eduv-app-bnnh-git-main-kevin-samus-projects.vercel.app', 'https://eduv-app-bnnh-mcyysc1pj-kevin-samus-projects.vercel.app'],
   credentials: true
 }));
 app.use(express.json());
