@@ -1,5 +1,5 @@
 // API configuration
-const API_URL = process.env.REACT_APP_API_URL || 'https://eduv-app-backend.up.railway.app/api';
+const API_URL = 'http://localhost:3000/api';
 
 export default {
   API_URL
