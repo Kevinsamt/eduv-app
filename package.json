@@ -32,7 +32,7 @@
   },
   "scripts": {
     "start": "concurrently \"set PORT=3000 && set HOST=192.168.24.133 && react-scripts start\" \"node server/server.js\"",
-    "build": "react-scripts build",
+    "build": "CI=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "server": "node server/server.js",
